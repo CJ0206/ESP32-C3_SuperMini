@@ -36,7 +36,7 @@ void setup() {
 
     // Initialize OLED Display
     u8g2.begin();
-    u8g2.setFont(u8g2_font_helvB12_tf); // Larger font
+    u8g2.setFont(u8g2_font_helvB14_tf); // Set font
 
     // Set timezone automatically based on region
     setenv("TZ", timeZone, 1);
@@ -60,14 +60,14 @@ void loop() {
     char dateString[6];
     strftime(dateString, sizeof(dateString), "%d/%m", &timeinfo);
 
-    // Display on OLED (Bigger text)
+    // Display on OLED (Adjusted positioning)
     u8g2.clearBuffer();
-    u8g2.setFont(u8g2_font_helvB12_tf); // Bigger font
+    u8g2.setFont(u8g2_font_helvB14_tf); // Set font
 
-    u8g2.setCursor(10, 30);   // Time (left)
+    u8g2.setCursor(10, 40);   // Time (left)
     u8g2.print(timeString);
 
-    u8g2.setCursor(90, 30);   // Date (right)
+    u8g2.setCursor(85, 40);   // Date (right)
     u8g2.print(dateString);
 
     u8g2.sendBuffer();
