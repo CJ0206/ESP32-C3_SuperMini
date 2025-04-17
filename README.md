@@ -17,6 +17,9 @@ If the program does not run after uploading, try pressing the `RESET` button to 
 
 If you are having issues withh the serial port not printing to terminal ensure `USB CDC On Boot` is `Enabled` in the tools menu.
 
+![image](https://github.com/user-attachments/assets/a565b22a-f6f6-4872-aef1-8c2c9e4095b3)
+
+
 ## [Flashing LED](LED_Flash.ino)
 
 This code will flash the boards onboard LED once every second.
