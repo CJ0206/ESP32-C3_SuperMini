@@ -73,3 +73,7 @@ Search for `u8g2` and install the [library](https://github.com/olikraus/u8g2) by
 ## [RTC](RTC.ino)
 
 This code will display a simple real time clock (HH:MM:SS) and date (DD/MM) on a 0.91" I2C OLED.
+
+## [Retro RTC](RetroRTC.ino)
+
+This code will display the WiFi signal of the [ESP32-C3 SuperMini](https://www.aliexpress.com/item/1005007446928015.html) across four bars in the top left of the [0.91" I2C OLED](https://www.aliexpress.com/item/1005006365845676.html), the date in the top right, and the time in the centre of the screen. It looks like a retro phone screen.
