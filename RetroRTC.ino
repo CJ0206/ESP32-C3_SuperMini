@@ -7,24 +7,24 @@
 const char* ssid = "your-ssid";         // WiFi network name (SSID)
 const char* password = "your-password"; // WiFi password
 
-// Location-Based Timezone (Change to your region)
-const char* timeZone = "Europe/London";
+// Daylight Savings-Aware Timezone
+const char* timeZone = "GMT0BST,M3.5.0/1,M10.5.0/2";
 
-// NTP Server
-const char* ntpServer = "pool.ntp.org";
+// NTP Servers
+const char* ntpServer1 = "pool.ntp.org";
+const char* ntpServer2 = "time.nist.gov";
+const char* ntpServer3 = "ntp2d.mcc.ac.uk";
 
 // OLED Display Setup (128×64 OLED using software I2C)
 U8G2_SSD1306_128X64_NONAME_F_SW_I2C u8g2(
   U8G2_R0, /* clock=*/ SCL, /* data=*/ SDA, /* reset=*/ U8X8_PIN_NONE
 );
 
-// Draw a WiFi icon as a series of four bars.
 void drawWiFiIcon(int x, int y, int activeBars) {
   const int barWidth = 3;
   const int barGap = 2;
-  // Progressive bar heights for a retro look.
   const int barHeights[4] = {3, 5, 7, 9};
-  int baseLine = y + 10;  // This aligns all bars along the bottom.
+  int baseLine = y + 10;
   
   for (int i = 0; i < 4; i++) {
     int barX = x + i * (barWidth + barGap);
@@ -60,7 +60,16 @@ void setup() {
   // Set timezone and configure NTP.
   setenv("TZ", timeZone, 1);
   tzset();
-  configTime(0, 0, ntpServer);
+  configTime(0, 0, ntpServer1, ntpServer2, ntpServer3);
+
+  Serial.println("Checking DST settings...");
+  struct tm timeinfo;
+  if (getLocalTime(&timeinfo)) {
+    Serial.printf("Raw time: %02d:%02d\n", timeinfo.tm_hour, timeinfo.tm_min);
+    Serial.printf("Daylight Saving (tm_isdst): %d\n", timeinfo.tm_isdst);
+  } else {
+    Serial.println("Failed to get time");
+  }
 }
 
 void loop() {
@@ -70,39 +79,37 @@ void loop() {
     return;
   }
 
-  // Format the time as "HH:MM", you can add :%S to add ":SS"
-  char timeString[9];  // "HH:MM" plus null terminator.
+  // Adjust for DST manually if necessary
+  if (timeinfo.tm_isdst == 0) {
+    timeinfo.tm_hour += 1;
+  }
+
+  // Format the time as "HH:MM"
+  char timeString[9];
   strftime(timeString, sizeof(timeString), "%H:%M", &timeinfo);
   
   // Format the date as "DD/MM"
-  char dateString[6];  // "DD/MM" plus null terminator.
+  char dateString[6];
   strftime(dateString, sizeof(dateString), "%d/%m", &timeinfo);
 
-  // Map WiFi RSSI to active bars (0 to 4).
+  // Map WiFi RSSI to active bars (0 to 4)
   int rssi = WiFi.RSSI();
-  int bars = 0;
-  if (rssi >= -50)       bars = 4;
-  else if (rssi >= -60)  bars = 3;
-  else if (rssi >= -70)  bars = 2;
-  else if (rssi >= -80)  bars = 1;
-  else                   bars = 0;
+  int bars = (rssi >= -50) ? 4 : (rssi >= -60) ? 3 : (rssi >= -70) ? 2 : (rssi >= -80) ? 1 : 0;
   
   u8g2.clearBuffer();
   
-  // Draw the WiFi icon in the top left.
+  // Draw the WiFi icon in the top left
   drawWiFiIcon(2, 2, bars);
 
-  // Draw the date in the top right.
+  // Draw the date in the top right
   u8g2.setFont(u8g2_font_freedoomr10_mu);
   u8g2.setFontPosTop();
-  // Expand the reference height so the lower part of the font is visible.
   u8g2.setFontRefHeightAll();
   int dateWidth = u8g2.getStrWidth(dateString);
-  // Place the date at y = 4 (adjust if needed).
   u8g2.setCursor(128 - dateWidth - 2, 4);
   u8g2.print(dateString);
 
-  // Draw the time in the center.
+  // Draw the time in the center
   u8g2.setFont(u8g2_font_freedoomr25_tn);
   u8g2.setFontPosTop();
   int timeWidth = u8g2.getStrWidth(timeString);
